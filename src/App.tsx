@@ -1,6 +1,6 @@
 import {defineComponent} from "vue";
 import ReserveDate from "@/components/ReserveDate/ReserveDate";
-
+import "./assets/app.scss";
 
 export default defineComponent({
     setup() {
@@ -9,10 +9,8 @@ export default defineComponent({
             currencySymbol: "zł",
             rating: 3.5,
             ratingCount: 123,
-            startDate: null,
-            emdDate: null,
             unavailableDates: [],
-            reserveButtonLabel: "Reserve"
+            reserveButtonLabel: "Reserve Date"
         }
 
         return {
