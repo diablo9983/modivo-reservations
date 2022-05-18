@@ -1,6 +1,7 @@
 import {defineComponent} from "vue";
-import ReserveDate from "@/components/ReserveDate/ReserveDate";
+import ReservationBox from "@/components/ReservationBox/ReservationBox";
 import "./assets/app.scss";
+import dayjs from "dayjs";
 
 export default defineComponent({
     setup() {
@@ -10,7 +11,9 @@ export default defineComponent({
             rating: 3.5,
             ratingCount: 123,
             unavailableDates: [],
-            reserveButtonLabel: "Reserve Date"
+            reserveButtonLabel: "Reserve Date",
+            startDate: dayjs("2022-03-15").toDate(),
+            endDate: dayjs("2022-05-25").toDate()
         }
 
         return {
@@ -21,12 +24,13 @@ export default defineComponent({
     render() {
         return <div style={{
             display: "flex",
+            flexDirection: "column",
             width: "100vw",
             height: "100vh",
             justifyContent: "center",
             alignItems: "center"
         }}>
-            <ReserveDate {...this.reservationDetails} />
+            <ReservationBox {...this.reservationDetails} />
         </div>
     }
 })

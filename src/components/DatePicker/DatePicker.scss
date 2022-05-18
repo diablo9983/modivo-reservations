@@ -1,0 +1,73 @@
+
+
+.datepicker {
+  background-color: #fff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  width: 300px;
+  padding: 24px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #D8D8D8;
+    border-radius: 48px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+  }
+
+  &__change-month {
+    background-color: transparent;
+    border: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+
+  &__current-date {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &__calendar {
+    display: flex;
+    flex-wrap: wrap;
+    width: 252px;
+    justify-content: space-between;
+    text-align: center;
+  }
+
+  &__day {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--weekday {
+      color: #999999;
+    }
+
+    &--inactive, &--reserved {
+      color: #D8D8D8;
+    }
+
+    &--today {
+      color: #4E9845;
+      border-color: #4E9845;
+    }
+  }
+}
