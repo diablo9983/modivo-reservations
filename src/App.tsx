@@ -12,8 +12,7 @@ export default defineComponent({
             ratingCount: 123,
             unavailableDates: [],
             reserveButtonLabel: "Reserve Date",
-            startDate: dayjs("2022-03-15").toDate(),
-            endDate: dayjs("2022-05-25").toDate()
+            startDate: dayjs("2022-03-15").toDate()
         }
 
         return {

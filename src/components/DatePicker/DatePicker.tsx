@@ -3,12 +3,16 @@ import type {PropType} from "vue";
 import dayjs from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import "dayjs/locale/en";
 import "./DatePicker.scss";
 import clsx from "clsx";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 dayjs.locale("en");
 
@@ -83,8 +87,6 @@ export default defineComponent({
         selectedStartDate: Date,
         selectedEndDate: Date,
         initialDate: Date,
-        minDate: Date,
-        maxDate: Date,
         disabledDates: Array as PropType<Date[]>
     },
     setup(props) {
@@ -137,11 +139,16 @@ export default defineComponent({
                    </div>
                 ))}
                 {this.days.map(day => {
+                    const disabled = (this.type === "from" && this.selectedEndDate && day.date.isSameOrAfter(this.selectedEndDate, "day"))
+                       || (this.type === "to" && this.selectedStartDate && day.date.isSameOrBefore(this.selectedStartDate, "day"));
+
                     return (
                         <div class={clsx(
-                            "datepicker__day",
-                            !day.isCurrentMonth && "datepicker__day--inactive",
-                            this.today.isSame(day.date, "date") && "datepicker__day--today")}
+                                "datepicker__day",
+                                !day.isCurrentMonth && "datepicker__day--inactive",
+                                this.today.isSame(day.date, "date") && "datepicker__day--today",
+                                disabled && "datepicker__day--disabled"
+                            )}
                             onClick={() => {
                                 console.log("elo")
                             }}
