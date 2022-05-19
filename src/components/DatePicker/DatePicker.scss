@@ -1,4 +1,13 @@
 
+@mixin elo {
+  content: "";
+  display: block;
+  position: absolute;
+  background-color: #EDF5EC;
+  width: 4px;
+  height: 32px;
+  top: -1px;
+}
 
 .datepicker {
   background-color: #fff;
@@ -42,20 +51,25 @@
     display: flex;
     flex-wrap: wrap;
     width: 252px;
+    grid-gap: 4px;
     justify-content: space-between;
     text-align: center;
   }
 
   &__day {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 50%;
-    border: 1px solid transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+
+    &, &-symbol {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     &--weekday {
       color: #999999;
@@ -74,10 +88,63 @@
       border-color: #4E9845;
     }
 
-    &:not(#{&}--weekday):not(#{&}--disabled):hover {
+    &:not(#{&}--weekday):not(#{&}--disabled):hover, &--in-range,
+    &--start-range#{&}--connected, &--end-range#{&}--connected {
       background-color: #EDF5EC;
       color: #4E9845;
+    }
+
+    &:not(#{&}--weekday):not(#{&}--disabled):hover {
       cursor: pointer;
+    }
+
+    &--start-range:not(#{&}--connected), &--end-range:not(#{&}--connected),
+    &--start-range &-symbol, &--end-range &-symbol {
+      background-color: #4E9845;
+      color: #fff;
+    }
+
+    &--start-range &-symbol,
+    &--end-range &-symbol{
+      position: absolute;
+      left: -1px;
+      top: -1px;
+    }
+
+    &--start-range#{&}--connected {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    &--end-range#{&}--connected {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    &--start-range#{&}--connected {
+      &::after {
+        @include elo();
+        left: calc(100% + 1px);
+      }
+    }
+    &--end-range#{&}--connected {
+      &::before {
+        @include elo();
+        right: calc(100% + 1px);
+      }
+    }
+
+    &--in-range {
+      border-radius: 0;
+
+      &:not(:nth-child(7n+1))::before, &:not(:nth-child(7n))::after {
+        @include elo();
+      }
+      &::before {
+        right: 100%;
+      }
+      &::after {
+        left: 100%;
+      }
     }
   }
 }

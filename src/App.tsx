@@ -10,9 +10,11 @@ export default defineComponent({
             currencySymbol: "zł",
             rating: 3.5,
             ratingCount: 123,
-            unavailableDates: [],
-            reserveButtonLabel: "Reserve Date",
-            startDate: dayjs("2022-03-15").toDate()
+            unavailableDates: [
+                dayjs("2022-05-10").toDate(),
+                { from: dayjs("2022-05-28").toDate(), to: dayjs("2022-05-30").toDate() }
+            ],
+            reserveButtonLabel: "Reserve Date"
         }
 
         return {

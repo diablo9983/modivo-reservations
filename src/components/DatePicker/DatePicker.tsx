@@ -5,6 +5,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/en";
 import "./DatePicker.scss";
 import clsx from "clsx";
@@ -13,6 +14,7 @@ dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.extend(isBetween);
 
 dayjs.locale("en");
 
@@ -77,6 +79,18 @@ const getDays = (year: string, month: string): DateCellInterface[] => {
     return [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
 }
 
+function dateRange(
+    start: Date,
+    end: Date
+): (number | Date)[] {
+    const startDate = dayjs(start);
+    const endDate = dayjs(end);
+    const diffInUnits = endDate.diff(startDate, "day") + 1;
+    return Array.from(Array(diffInUnits).keys()).map((i) => {
+        return startDate.add(i, "day").toDate()
+    });
+}
+
 export default defineComponent({
     name: "DatePicker",
     props: {
@@ -87,12 +101,25 @@ export default defineComponent({
         selectedStartDate: Date,
         selectedEndDate: Date,
         initialDate: Date,
-        disabledDates: Array as PropType<Date[]>
+        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>
     },
-    setup(props) {
+    emits: {
+        select: (date: Date | null) => date instanceof Date || date === null
+    },
+    setup(props, { emit }) {
         const today = dayjs();
 
         const currentDate = ref(dayjs(props.initialDate || today));
+
+        const disabledDates = computed(() => {
+            return props.unavailableDates?.flatMap(date => {
+                if (date instanceof Date) {
+                    return dayjs(date)
+                } else {
+                    return dateRange(date.from, date.to).map(date => dayjs(date));
+                }
+            })
+        });
 
         const days = computed(() => {
             return getDays(currentDate.value.format("YYYY"), currentDate.value.format("M"));
@@ -104,11 +131,29 @@ export default defineComponent({
         const showNextMonth = () => {
             currentDate.value = dayjs(`${currentDate.value.format("YYYY")}-${currentDate.value.format("M")}-01`).add(1, "month");
         }
+        const handleDateClick = (day: DateCellInterface) => {
+            const startDate = props.type === "from" ? day.date.toDate() : props.selectedStartDate;
+            const endDate = props.type === "to" ? day.date.toDate() : props.selectedEndDate;
+
+            if (startDate && endDate) {
+                const daysInRange = dateRange(startDate, endDate).map(date => dayjs(date).format("YYYY-MM-DD"));
+                const disabled = (disabledDates.value || []).map(date => date.format("YYYY-MM-DD"));
+                const includesDisabled = daysInRange.some(date => disabled.includes(date));
+
+                if (includesDisabled) {
+                    return;
+                }
+            }
+
+            emit('select', day.date.toDate())
+        }
 
         return {
             days,
             today,
             currentDate,
+            disabledDates,
+            handleDateClick,
             showPrevMonth,
             showNextMonth
         }
@@ -138,22 +183,33 @@ export default defineComponent({
                        {weekday}
                    </div>
                 ))}
-                {this.days.map(day => {
+                {this.days.map((day) => {
                     const disabled = (this.type === "from" && this.selectedEndDate && day.date.isSameOrAfter(this.selectedEndDate, "day"))
-                       || (this.type === "to" && this.selectedStartDate && day.date.isSameOrBefore(this.selectedStartDate, "day"));
+                        || (this.type === "to" && this.selectedStartDate && day.date.isSameOrBefore(this.selectedStartDate, "day"))
+                        || !!this.disabledDates?.find((date: dayjs.Dayjs) => day.date.isSame(date));
+
+                    const isToday = this.today.isSame(day.date, "date");
+                    const isStartDate = day.date.isSame(this.selectedStartDate);
+                    const isEndDate = day.date.isSame(this.selectedEndDate);
+                    const inRange = this.selectedStartDate && this.selectedEndDate && day.date.isBetween(this.selectedStartDate, this.selectedEndDate);
+                    const isConnected = (isStartDate || isEndDate) && this.selectedStartDate && this.selectedEndDate
 
                     return (
                         <div class={clsx(
                                 "datepicker__day",
                                 !day.isCurrentMonth && "datepicker__day--inactive",
-                                this.today.isSame(day.date, "date") && "datepicker__day--today",
-                                disabled && "datepicker__day--disabled"
+                                isToday && "datepicker__day--today",
+                                disabled && "datepicker__day--disabled",
+                                isStartDate && "datepicker__day--start-range",
+                                isEndDate && "datepicker__day--end-range",
+                                inRange && "datepicker__day--in-range",
+                                isConnected && "datepicker__day--connected"
                             )}
-                            onClick={() => {
-                                console.log("elo")
-                            }}
+                            onClick={() => !disabled && this.handleDateClick(day)}
                         >
-                            {day.date.format("DD")}
+                            <span class={"datepicker__day-symbol"}>
+                                {day.date.format("DD")}
+                            </span>
                         </div>
                     )
                 })}

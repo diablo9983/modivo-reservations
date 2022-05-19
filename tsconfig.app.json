@@ -5,6 +5,8 @@
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "jsx": "preserve",
+    "lib": ["ES2019"],
     "paths": {
       "@/*": ["./src/*"]
     }
