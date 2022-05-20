@@ -28,7 +28,7 @@ const daysInMonth = (year: string, month: string) => dayjs(`${year}-${month}-01`
 const weekDays = dayjs.weekdaysShort();
 
 function createDaysForCurrentMonth(year: string, month: string): DateCellInterface[] {
-    return [...Array(daysInMonth(year, month))].map((day, index) => {
+    return [...Array.from({ length: daysInMonth(year, month) })].map((day, index) => {
         return {
             date: dayjs(`${year}-${month}-${index + 1}`),
             dayOfMonth: index + 1,
@@ -46,7 +46,7 @@ function createDaysForPreviousMonth(year: string, month: string, currentMonthDay
         currentMonthDays[0].date
     ).subtract(firstDayOfTheMonthWeekday, "day").date();
 
-    return [...Array(firstDayOfTheMonthWeekday)].map((day, index) => {
+    return [...Array.from({ length: firstDayOfTheMonthWeekday })].map((day, index) => {
         return {
             date: dayjs(
                 `${previousMonth.year()}-${previousMonth.month() + 1}-${previousMonthLastMondayDayOfMonth + index}`
@@ -62,7 +62,7 @@ function createDaysForNextMonth(year: string, month: string, currentMonthDays: D
 
     const visibleNumberOfDaysFromNextMonth = lastDayOfTheMonthWeekday ? 6 - lastDayOfTheMonthWeekday : lastDayOfTheMonthWeekday
 
-    return [...Array(visibleNumberOfDaysFromNextMonth)].map((day, index) => {
+    return [...Array.from({ length: visibleNumberOfDaysFromNextMonth })].map((day, index) => {
         return {
             date: dayjs(`${year}-${Number(month) + 1}-${index + 1}`),
             dayOfMonth: index + 1,
