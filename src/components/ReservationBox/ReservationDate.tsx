@@ -13,7 +13,11 @@ export default defineComponent({
             default: "from"
         },
         range: Object as PropType<{ from: Date | null, to: Date | null }>,
-        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>
+        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>,
+        emptyLabel: {
+            type: String,
+            required: true
+        }
     },
 
     directives: {
@@ -57,7 +61,7 @@ export default defineComponent({
                             {this.selectedDate?.format("DD MMM YYYY")}
                             <button class={"reserve-dates__clear"} onClick={withModifiers(this.handleClear, ["stop"])}>&times;</button>
                         </>
-                        : "Date from"
+                        : this.emptyLabel
                     }
                 </div>
                 {this.pickerOpen && <div class={"reserve-date__picker"}>
