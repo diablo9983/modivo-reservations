@@ -14,7 +14,7 @@ export default defineComponent({
                 dayjs("2022-05-10").toDate(),
                 { from: dayjs("2022-05-28").toDate(), to: dayjs("2022-05-30").toDate() }
             ],
-            reserveButtonLabel: "Reserve Date"
+            reserveButtonLabel: "Reserve"
         }
 
         return {
