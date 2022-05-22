@@ -1,4 +1,4 @@
-import {computed, defineComponent, ref} from "vue";
+import {computed, defineComponent} from "vue";
 import type {PropType} from "vue";
 import dayjs from "dayjs";
 import weekday from "dayjs/plugin/weekday";
@@ -9,6 +9,9 @@ import isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/en";
 import "./DatePicker.scss";
 import clsx from "clsx";
+import {useCalendar} from "@/composables/useCalendar";
+import type {DateCellInterface} from "@/composables/useCalendar";
+import {dateRange} from "@/utils/dateRange";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -18,76 +21,7 @@ dayjs.extend(isBetween);
 
 dayjs.locale("en");
 
-interface DateCellInterface {
-    date: dayjs.Dayjs,
-    dayOfMonth: number,
-    isCurrentMonth: boolean
-}
-
-const daysInMonth = (year: string, month: string) => dayjs(`${year}-${month}-01`).daysInMonth();
 const weekDays = dayjs.weekdaysShort();
-
-function createDaysForCurrentMonth(year: string, month: string): DateCellInterface[] {
-    return Array.from({ length: daysInMonth(year, month) }).map((day, index) => {
-        return {
-            date: dayjs(`${year}-${month}-${index + 1}`),
-            dayOfMonth: index + 1,
-            isCurrentMonth: true
-        };
-    });
-}
-
-function createDaysForPreviousMonth(year: string, month: string): DateCellInterface[] {
-    const currentMonth = dayjs(`${year}-${month}-01`);
-    const firstDayOfTheMonthWeekday = currentMonth.weekday();
-
-    const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, "month");
-    const previousMonthLastMondayDayOfMonth = dayjs(currentMonth).subtract(firstDayOfTheMonthWeekday, "day").date();
-
-    return Array.from({ length: firstDayOfTheMonthWeekday }).map((day, index) => {
-        return {
-            date: dayjs(
-                `${previousMonth.year()}-${previousMonth.month() + 1}-${previousMonthLastMondayDayOfMonth + index}`
-            ),
-            dayOfMonth: previousMonthLastMondayDayOfMonth + index,
-            isCurrentMonth: false
-        };
-    });
-}
-
-function createDaysForNextMonth(year: string, month: string): DateCellInterface[] {
-    const lastDayOfTheMonthWeekday = dayjs(`${year}-${month}-${daysInMonth(year, month)}`).weekday();
-
-    const visibleNumberOfDaysFromNextMonth = lastDayOfTheMonthWeekday ? 6 - lastDayOfTheMonthWeekday : lastDayOfTheMonthWeekday
-
-    return Array.from({ length: visibleNumberOfDaysFromNextMonth }).map((day, index) => {
-        return {
-            date: dayjs(`${year}-${Number(month) + 1}-${index + 1}`),
-            dayOfMonth: index + 1,
-            isCurrentMonth: false
-        }
-    })
-}
-
-const getDays = (year: string, month: string): DateCellInterface[] => {
-    const currentMonthDays = createDaysForCurrentMonth(year, month);
-    const previousMonthDays = createDaysForPreviousMonth(year, month);
-    const nextMonthDays = createDaysForNextMonth(year, month);
-
-    return [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
-}
-
-function dateRange(
-    start: Date,
-    end: Date
-): (number | Date)[] {
-    const startDate = dayjs(start);
-    const endDate = dayjs(end);
-    const diffInUnits = endDate.diff(startDate, "day") + 1;
-    return Array.from(Array(diffInUnits).keys()).map((i) => {
-        return startDate.add(i, "day").toDate()
-    });
-}
 
 export default defineComponent({
     name: "DatePicker",
@@ -105,9 +39,7 @@ export default defineComponent({
         select: (date: Date | null) => date instanceof Date || date === null
     },
     setup(props, { emit }) {
-        const today = dayjs();
-
-        const currentDate = ref(dayjs(props.initialDate || today));
+        const { days, currentDate, showNextMonth, showPreviousMonth } = useCalendar(props.initialDate)
 
         const disabledDates = computed(() => {
             return props.unavailableDates?.flatMap(date => {
@@ -119,16 +51,6 @@ export default defineComponent({
             })
         });
 
-        const days = computed(() => {
-            return getDays(currentDate.value.format("YYYY"), currentDate.value.format("M"));
-        });
-
-        const showPrevMonth = () => {
-            currentDate.value = dayjs(`${currentDate.value.format("YYYY")}-${currentDate.value.format("M")}-01`).subtract(1, "month");
-        }
-        const showNextMonth = () => {
-            currentDate.value = dayjs(`${currentDate.value.format("YYYY")}-${currentDate.value.format("M")}-01`).add(1, "month");
-        }
         const handleDateClick = (day: DateCellInterface) => {
             const startDate = props.type === "from" ? day.date.toDate() : props.selectedStartDate;
             const endDate = props.type === "to" ? day.date.toDate() : props.selectedEndDate;
@@ -147,12 +69,11 @@ export default defineComponent({
         }
 
         return {
-            days,
-            today,
             currentDate,
+            days,
             disabledDates,
             handleDateClick,
-            showPrevMonth,
+            showPreviousMonth,
             showNextMonth
         }
     },
@@ -160,7 +81,7 @@ export default defineComponent({
     render() {
         return <div class={"datepicker"}>
             <div class="datepicker__header">
-                <button class={"datepicker__change-month"} onClick={this.showPrevMonth}>
+                <button class={"datepicker__change-month"} onClick={this.showPreviousMonth}>
                     <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6.7 13.405C6.60134 13.4063 6.50344 13.3875 6.41231 13.3497C6.32117 13.3118 6.23872 13.2558 6.17 13.185L0.955 7.97C0.698525 7.71232 0.554539 7.36356 0.554539 7C0.554539 6.63644 0.698525 6.28767 0.955 6.03L6.17 0.814997C6.23929 0.744852 6.32182 0.68916 6.4128 0.65115C6.50378 0.613139 6.6014 0.593567 6.7 0.593567C6.7986 0.593567 6.89622 0.613139 6.9872 0.65115C7.07818 0.68916 7.16071 0.744852 7.23 0.814997C7.36924 0.956261 7.4473 1.14665 7.4473 1.345C7.4473 1.54335 7.36924 1.73373 7.23 1.875L2.105 7L7.23 12.125C7.36924 12.2663 7.4473 12.4566 7.4473 12.655C7.4473 12.8533 7.36924 13.0437 7.23 13.185C7.16093 13.2553 7.07841 13.3111 6.98736 13.3489C6.89631 13.3867 6.79858 13.4057 6.7 13.405Z" fill="#333333"/>
                     </svg>
@@ -186,7 +107,7 @@ export default defineComponent({
                         || (this.type === "to" && this.selectedStartDate && day.date.isSameOrBefore(this.selectedStartDate, "day"))
                         || !!this.disabledDates?.find((date: dayjs.Dayjs) => day.date.isSame(date));
 
-                    const isToday = this.today.isSame(day.date, "date");
+                    const isToday = dayjs().isSame(day.date, "date");
                     const isStartDate = day.date.isSame(this.selectedStartDate);
                     const isEndDate = day.date.isSame(this.selectedEndDate);
                     const inRange = this.selectedStartDate && this.selectedEndDate && day.date.isBetween(this.selectedStartDate, this.selectedEndDate);
