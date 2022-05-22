@@ -23,6 +23,11 @@ dayjs.locale("en");
 
 const weekDays = dayjs.weekdaysShort();
 
+export interface DateRange {
+    from: Date,
+    to: Date
+}
+
 export default defineComponent({
     name: "DatePicker",
     props: {
@@ -33,7 +38,7 @@ export default defineComponent({
         selectedStartDate: Date,
         selectedEndDate: Date,
         initialDate: Date,
-        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>
+        unavailableDates: Array as PropType<(Date | DateRange)[]>
     },
     emits: {
         select: (date: Date | null) => date instanceof Date || date === null
@@ -79,17 +84,19 @@ export default defineComponent({
     },
 
     render() {
+        const currentMonthYear = this.currentDate.format("MMMM YYYY");
+
         return <div class={"datepicker"}>
             <div class="datepicker__header">
-                <button class={"datepicker__change-month"} onClick={this.showPreviousMonth}>
+                <button class={"datepicker__change-month datepicker__change-month--previous"} onClick={this.showPreviousMonth}>
                     <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6.7 13.405C6.60134 13.4063 6.50344 13.3875 6.41231 13.3497C6.32117 13.3118 6.23872 13.2558 6.17 13.185L0.955 7.97C0.698525 7.71232 0.554539 7.36356 0.554539 7C0.554539 6.63644 0.698525 6.28767 0.955 6.03L6.17 0.814997C6.23929 0.744852 6.32182 0.68916 6.4128 0.65115C6.50378 0.613139 6.6014 0.593567 6.7 0.593567C6.7986 0.593567 6.89622 0.613139 6.9872 0.65115C7.07818 0.68916 7.16071 0.744852 7.23 0.814997C7.36924 0.956261 7.4473 1.14665 7.4473 1.345C7.4473 1.54335 7.36924 1.73373 7.23 1.875L2.105 7L7.23 12.125C7.36924 12.2663 7.4473 12.4566 7.4473 12.655C7.4473 12.8533 7.36924 13.0437 7.23 13.185C7.16093 13.2553 7.07841 13.3111 6.98736 13.3489C6.89631 13.3867 6.79858 13.4057 6.7 13.405Z" fill="#333333"/>
                     </svg>
                 </button>
                 <span class={"datepicker__current-date"}>
-                    {this.currentDate.format("MMMM")} {this.currentDate.format("YYYY")}
+                    {currentMonthYear}
                 </span>
-                <button class={"datepicker__change-month"} onClick={this.showNextMonth}>
+                <button class={"datepicker__change-month datepicker__change-month--next"} onClick={this.showNextMonth}>
                     <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1.3 13.405C1.20142 13.4057 1.10369 13.3867 1.01264 13.3489C0.921591 13.3111 0.839074 13.2553 0.77 13.185C0.63076 13.0437 0.552704 12.8533 0.552704 12.655C0.552704 12.4566 0.63076 12.2663 0.77 12.125L5.895 7L0.77 1.875C0.63076 1.73373 0.552704 1.54335 0.552704 1.345C0.552704 1.14665 0.63076 0.956261 0.77 0.814997C0.839294 0.744852 0.921823 0.68916 1.0128 0.65115C1.10378 0.613139 1.2014 0.593567 1.3 0.593567C1.3986 0.593567 1.49622 0.613139 1.5872 0.65115C1.67818 0.68916 1.76071 0.744852 1.83 0.814997L7.045 6.03C7.30148 6.28767 7.44546 6.63644 7.44546 7C7.44546 7.36356 7.30148 7.71232 7.045 7.97L1.83 13.185C1.76128 13.2558 1.67883 13.3118 1.58769 13.3497C1.49656 13.3875 1.39866 13.4063 1.3 13.405Z" fill="#333333"/>
                     </svg>
@@ -124,6 +131,7 @@ export default defineComponent({
                                 inRange && "datepicker__day--in-range",
                                 isConnected && "datepicker__day--connected"
                             )}
+                            data-date={day.date.format("DD-MM-YYYY")}
                             onClick={() => !disabled && this.handleDateClick(day)}
                         >
                             <span class={"datepicker__day-symbol"}>

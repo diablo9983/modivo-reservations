@@ -2,6 +2,7 @@ import {defineComponent, ref} from "vue";
 import type { PropType } from "vue";
 import "./ReservationBox.scss";
 import ReservationDate from "@/components/ReservationBox/ReservationDate";
+import type {DateRange} from "@/components/DatePicker/DatePicker";
 
 export default defineComponent({
     name: "ReserveDate",
@@ -28,7 +29,7 @@ export default defineComponent({
         },
         startDate: Date,
         endDate: Date,
-        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>
+        unavailableDates: Array as PropType<(Date | DateRange)[]>
     },
     setup(props) {
 

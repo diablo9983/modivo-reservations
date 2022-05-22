@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 export function dateRange(
 	start: Date,
 	end: Date
-): (number | Date)[] {
+): Date[] {
 	const startDate = dayjs(start);
 	const endDate = dayjs(end);
 	const diffInUnits = endDate.diff(startDate, "day") + 1;

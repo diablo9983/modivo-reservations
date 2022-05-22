@@ -1,6 +1,7 @@
 import {computed, defineComponent, ref, withModifiers} from "vue";
 import type {PropType} from "vue";
 import DatePicker from "@/components/DatePicker/DatePicker";
+import type {DateRange} from "@/components/DatePicker/DatePicker";
 import dayjs from "dayjs";
 import vClickOutside from 'click-outside-vue3';
 import clsx from "clsx";
@@ -13,7 +14,7 @@ export default defineComponent({
             default: "from"
         },
         range: Object as PropType<{ from: Date | null, to: Date | null }>,
-        unavailableDates: Array as PropType<(Date | { from: Date, to: Date })[]>,
+        unavailableDates: Array as PropType<(Date | DateRange)[]>,
         emptyLabel: {
             type: String,
             required: true
