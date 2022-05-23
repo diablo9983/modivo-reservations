@@ -112,7 +112,7 @@ export default defineComponent({
                 {this.days.map((day) => {
                     const disabled = (this.type === "from" && this.selectedEndDate && day.date.isSameOrAfter(this.selectedEndDate, "day"))
                         || (this.type === "to" && this.selectedStartDate && day.date.isSameOrBefore(this.selectedStartDate, "day"))
-                        || !!this.disabledDates?.find((date: dayjs.Dayjs) => day.date.isSame(date));
+                        || !!this.disabledDates?.find((date: dayjs.Dayjs) => day.date.format("DD-MM-YYYY") === date.format("DD-MM-YYYY"));
 
                     const isToday = dayjs().isSame(day.date, "date");
                     const isStartDate = day.date.isSame(this.selectedStartDate);

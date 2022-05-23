@@ -60,7 +60,7 @@ export default defineComponent({
                     {this.selectedDate
                         ? <>
                             {this.selectedDate?.format("DD MMM YYYY")}
-                            <button class={"reserve-dates__clear"} onClick={withModifiers(this.handleClear, ["stop"])}>&times;</button>
+                            <button class={"reserve-dates__clear"} data-clear="" onClick={withModifiers(this.handleClear, ["stop"])}>&times;</button>
                         </>
                         : this.emptyLabel
                     }

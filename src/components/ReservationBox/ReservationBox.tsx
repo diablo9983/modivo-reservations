@@ -1,7 +1,7 @@
 import {defineComponent, ref} from "vue";
 import type { PropType } from "vue";
 import "./ReservationBox.scss";
-import ReservationDate from "@/components/ReservationBox/ReservationDate";
+import ReservationDate from "@/components/ReservationBox/ReservationDate/ReservationDate";
 import type {DateRange} from "@/components/DatePicker/DatePicker";
 
 export default defineComponent({
@@ -31,16 +31,20 @@ export default defineComponent({
         endDate: Date,
         unavailableDates: Array as PropType<(Date | DateRange)[]>
     },
-    setup(props) {
-
+    emits: {
+        change: (range: { from: Date, to: Date }) => range.from instanceof Date && range.to instanceof Date
+    },
+    setup(props, { emit }) {
         const selectedStartDate = ref(props.startDate || null);
         const selectedEndDate = ref(props.endDate || null);
 
         const handleReserveClick = () => {
-            console.log({
-                selectedStartDate: selectedStartDate.value,
-                selectedEndDate: selectedEndDate.value
-            })
+            if (selectedStartDate.value && selectedEndDate.value) {
+                emit("change", {
+                    from: selectedStartDate.value,
+                    to: selectedEndDate.value
+                });
+            }
         }
 
         return {
@@ -63,11 +67,11 @@ export default defineComponent({
                         <span class={"reserve-rating__count"}>{this.ratingCount}</span>
                     </div>
                 </div>
-                <button onClick={this.handleReserveClick} class={"reserve-date__reserve"}>{this.reserveButtonLabel}</button>
+                <button onClick={this.handleReserveClick} data-reserve="" class={"reserve-date__reserve"}>{this.reserveButtonLabel}</button>
             </div>
             <div class={"reserve-date__bottom"}>
                 <div class="reserve-dates">
-                    <ReservationDate class="reserve-dates__from" range={{
+                    <ReservationDate class="reserve-dates__from" type={"from"} range={{
                         from: this.selectedStartDate,
                         to: this.selectedEndDate
                     }} onChange={(date) => {
